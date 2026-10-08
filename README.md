@@ -28,7 +28,7 @@
 ## Moved to other departments
 
 - Proxmox VM Terraform and the cloud-init guide: [lab-ops](https://github.com/Dstanfield-Creator/lab-ops) (`terraform/proxmox-vm/`, `docs/`)
-- Prometheus / Grafana Compose stack: [monitoring](https://github.com/Dstanfield-Creator/monitoring/tree/main/compose/monitoring-stack)
+- Prometheus / Grafana Compose stack: [monitoring](https://github.com/Dstanfield-Creator/cyber-resources/tree/master/monitoring/compose/monitoring-stack)
 
 ## Conventions
 
