@@ -41,7 +41,7 @@ docker-compose.yml
 .env.example                 -> copy to .env
 prometheus/prometheus.yml    scrape jobs and Alertmanager address
 prometheus/alerts.yml        alerting rules
-grafana/provisioning/        datasource and dashboard-provider YAML (you create these)
+grafana/provisioning/        datasource and dashboard-provider YAML (included)
 grafana/dashboards/          dashboard JSON picked up by the provider (you create these)
 alertmanager/alertmanager.yml  optional receiver config (you create this)
 ```

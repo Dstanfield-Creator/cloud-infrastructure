@@ -8,7 +8,6 @@ Cloud platform guides, Infrastructure-as-Code, deployment strategies, and operat
 ├── docs/                # Cloud architecture and deployment guides
 ├── terraform/           # Terraform modules and configurations
 ├── docker-compose/      # Container orchestration examples
-├── examples/            # Real-world architecture examples
 ├── reference/           # Quick reference and checklists
 ├── CONTRIBUTING.md      # Contribution guidelines
 └── LICENSE
