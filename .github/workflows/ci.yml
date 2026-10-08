@@ -1,0 +1,39 @@
+name: ci
+on:
+  push:
+    branches: [master]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    name: Relative link check
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check relative Markdown links
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: "--offline --no-progress --include-fragments './**/*.md'"
+          fail: true
+  yaml:
+    runs-on: ubuntu-latest
+    name: YAML validation
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PyYAML
+        run: python3 -m pip install --quiet pyyaml
+      - name: Validate YAML files
+        run: |
+          python3 - <<'PY'
+          import glob, sys, yaml
+          bad = 0
+          files = glob.glob('**/*.yml', recursive=True) + glob.glob('**/*.yaml', recursive=True)
+          for f in sorted(files):
+              try:
+                  list(yaml.safe_load_all(open(f)))
+                  print(f"ok   {f}")
+              except Exception as e:
+                  print(f"FAIL {f}: {e}"); bad += 1
+          sys.exit(1 if bad else 0)
+          PY
