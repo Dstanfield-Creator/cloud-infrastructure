@@ -1,0 +1,65 @@
+# Prometheus configuration for the monitoring-stack compose project.
+# Reload without restart: curl -X POST http://localhost:9090/-/reload
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  scrape_timeout: 10s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
+
+rule_files:
+  - /etc/prometheus/alerts.yml
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # Host metrics from the Docker host
+  - job_name: node_exporter
+    static_configs:
+      - targets: ["node_exporter:9100"]
+        labels:
+          host: docker-host
+
+  # Per-container metrics
+  - job_name: cadvisor
+    static_configs:
+      - targets: ["cadvisor:8080"]
+        labels:
+          host: docker-host
+
+  # blackbox_exporter's own metrics (probe counts, config reloads)
+  - job_name: blackbox_exporter
+    static_configs:
+      - targets: ["blackbox_exporter:9115"]
+
+  # TCP probes of SSH endpoints. The ssh_banner module (built into the
+  # exporter's default config) connects and expects an "SSH-2.0-" banner,
+  # so it also catches a port that is open but not serving SSH.
+  #
+  # Relabel pattern: the listed target becomes the ?target= parameter and
+  # the instance label, and the request itself goes to blackbox_exporter.
+  - job_name: blackbox_ssh
+    metrics_path: /probe
+    params:
+      module: [ssh_banner]
+    static_configs:
+      - targets:
+          - 192.0.2.11:22
+          - 192.0.2.12:22
+          - 192.0.2.13:22
+        labels:
+          probe: ssh
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox_exporter:9115

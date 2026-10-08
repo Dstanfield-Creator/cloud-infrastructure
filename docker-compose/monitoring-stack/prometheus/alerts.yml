@@ -1,0 +1,54 @@
+# Alerting rules loaded by prometheus.yml (rule_files).
+# Check syntax with: docker compose exec prometheus promtool check rules /etc/prometheus/alerts.yml
+
+groups:
+  - name: targets
+    rules:
+      - alert: TargetDown
+        expr: up == 0
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Scrape target {{ $labels.instance }} is down"
+          description: "Job {{ $labels.job }} has failed to scrape {{ $labels.instance }} for 10 minutes."
+
+  - name: host
+    rules:
+      - alert: HostDiskUsageHigh
+        expr: |
+          (
+            1 - node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs|iso9660"}
+              / node_filesystem_size_bytes{fstype!~"tmpfs|overlay|squashfs|iso9660"}
+          ) * 100 > 85
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk {{ $labels.mountpoint }} on {{ $labels.instance }} is {{ $value | printf \"%.0f\" }}% full"
+          description: "Filesystem {{ $labels.device }} mounted at {{ $labels.mountpoint }} has been above 85% for 1 hour."
+
+  - name: containers
+    rules:
+      # cAdvisor has no restart counter. A container that restarts gets a new
+      # cgroup, which resets its cumulative CPU counter to zero, so counting
+      # counter resets over the window counts restarts.
+      - alert: ContainerRestarting
+        expr: resets(container_cpu_usage_seconds_total{name!=""}[1h]) > 3
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container {{ $labels.name }} has restarted {{ $value }} times in the last hour"
+          description: "Container {{ $labels.name }} on {{ $labels.instance }} is restarting repeatedly. Check docker logs {{ $labels.name }}."
+
+  - name: blackbox
+    rules:
+      - alert: SSHProbeFailed
+        expr: probe_success{job="blackbox_ssh"} == 0
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "SSH probe to {{ $labels.instance }} is failing"
+          description: "blackbox_exporter could not complete an SSH banner exchange with {{ $labels.instance }} for 10 minutes."

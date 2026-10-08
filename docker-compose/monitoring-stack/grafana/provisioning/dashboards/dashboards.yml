@@ -1,0 +1,11 @@
+# Grafana dashboard provider: loads every JSON file under grafana/dashboards/.
+apiVersion: 1
+providers:
+  - name: lab
+    folder: Lab
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
